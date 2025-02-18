@@ -14,7 +14,9 @@ public class ThreadGame extends Thread {
             while (true) {
                 sleep(200);
                 gameView.move();
+                gameView.moveNau();
                 gameView.collisions();
+                gameView.collisionNauBall();
                 gameView.postInvalidate();
             }
         } catch (Exception e) {

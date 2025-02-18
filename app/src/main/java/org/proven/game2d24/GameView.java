@@ -118,6 +118,14 @@ public class GameView extends View {
         }
     }
 
+    public void moveNau() {
+        nau.move();
+    }
+
+    public void collisionsNauBall() {
+        //todo
+    }
+
     public void collisions() {
         Ball b1, b2;
         for (int i = 0; i < listBalls.size() - 1; i++) {
@@ -141,6 +149,10 @@ public class GameView extends View {
                 }
             }
         }
+    }
+
+    public void collisionNauBall() {
+        // TODO
     }
 
     @Override

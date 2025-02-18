@@ -9,6 +9,7 @@ public class GraficNau {
     private View view;			// Vista a la que dibuixarem
     private int ampleImg, altImg;     //Dimensions de l'imatge
     private double posX, posY;   //Posició de la Nau al layout (vista)
+    private boolean direccioDreta = true;  // true = moure a la dreta, false = moure a l'esquerra
 
     protected GraficNau(View viewParam, Drawable drawableNau) {
         this.view = viewParam;
@@ -45,6 +46,27 @@ public class GraficNau {
     }
     public double getPosY() {
         return this.posY;
+    }
+
+    public boolean collisionBallAndNau(Ball b, GraficNau nau) {
+        //todo
+        return false;
+    }
+
+    public void move() {
+        int screenWidth = view.getWidth();
+        if (posX <= 0) {  // Comprovar límit esquerra
+            direccioDreta = true;
+        } else if (posX >= screenWidth - ampleImg) {  // Dreta límit
+            direccioDreta = false;
+        }
+
+        // Moure segons la direcció
+        if (direccioDreta) {
+            posX += 15;  // Moure a la dreta
+        } else {
+            posX -= 15;  // Moure a l'esquerra
+        }
     }
 
 }
