@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -17,14 +18,19 @@ public class GameView extends View {
 
     ArrayList<Ball> listBalls;
 
+    Drawable drawableNau;
+
+    // Nau
+    GraficNau nau;
+
     public GameView(Context context) {
         super(context);
-        initBalls();
+        initEnvioroment(context);
     }
 
     public GameView(Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        initBalls();
+        initEnvioroment(context);
         setOnTouchListener(new OnTouchListener() {
             @Override
             public boolean onTouch(View v, android.view.MotionEvent event) {
@@ -75,9 +81,13 @@ public class GameView extends View {
             b.setMaxX(w);
             b.setMaxY(h);
         }
+        // Posicionar la nave en la parte inferior central
+        nau.setPosX(w/2 - drawableNau.getIntrinsicWidth()/2);
+        nau.setPosY(h - drawableNau.getIntrinsicHeight() - 10); // 10 píxeles de margen
     }
 
-    private void initBalls() {
+    private void initEnvioroment(Context context) {
+        // Boles
         listBalls = new ArrayList<>();
         Ball ball = new Ball(200, 200);
         ball.setRadius(100);
@@ -96,6 +106,10 @@ public class GameView extends View {
 
         listBalls.add(ball);
         listBalls.add(ball1);
+
+        // Nau
+        drawableNau = context.getResources().getDrawable(R.drawable.nau,context.getTheme());
+        nau = new GraficNau(this, drawableNau);
     }
 
     public void move() {
@@ -129,12 +143,15 @@ public class GameView extends View {
         }
     }
 
-
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
         for (Ball b : listBalls) {
             b.onDraw(canvas);
+        }
+        // Dibujar la nave
+        if (nau != null) {
+            nau.dibuixaGrafic(canvas);
         }
     }
 }
