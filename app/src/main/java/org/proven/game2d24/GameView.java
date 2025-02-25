@@ -123,7 +123,7 @@ public class GameView extends View {
     }
 
     public void collisionsNauBall() {
-        //todo
+        //TODO
     }
 
     public void collisions() {
