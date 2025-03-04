@@ -4,6 +4,12 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 
+/*
+ * Ball class
+ * author: Arnau Nuñez
+ * data: 04/03/2025
+ * grup: DAM2
+ */
 public class Ball {
     int x, y;  // Position
     int maxX, maxY; // Límit X Y
@@ -32,6 +38,10 @@ public class Ball {
         this.y = y;
     }
 
+    /**
+     * Comprova si hi ha col·lisió entre dues boles
+     * @param b - la bola amb la que es comprova la col·lisió
+     */
     public boolean collision(Ball b) {
         boolean ret = false;
         double D =
@@ -56,18 +66,20 @@ public class Ball {
 
     public void move() {
         if (moveOnlyVertically) {
-            // For bullets - move only vertically
+            // Per a les boles que només es mouen verticalment
             y = directionY ? y + velocity : y - velocity;
         } else {
-            // For normal balls - move in both directions
+            // Per a les boles que es mouen en qualsevol direcció
             x = directionX ? x + velocity : x - velocity;
             y = directionY ? y + velocity : y - velocity;
         }
 
-        // Boundary logic (existing code)
+        // Comprovar si la bola ha arribat als límits de la pantalla
         if (x - radius <= 0 || x + radius >= maxX) {
             directionX = !directionX;
         }
+
+        // Comprovar si la bola ha arribat als límits de la pantalla
         if (y - radius <= 0 || y + radius >= maxY) {
             directionY = !directionY;
         }

@@ -4,6 +4,12 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
+/*
+ * GraficNau class
+ * author: Arnau Nuñez
+ * data: 04/03/2025
+ * grup: DAM2
+ */
 public class GraficNau {
     private Drawable drawable;   //Imatge que dibuixarem
     private View view;			// Vista a la que dibuixarem

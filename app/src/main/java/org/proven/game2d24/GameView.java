@@ -15,6 +15,12 @@ import androidx.appcompat.app.AlertDialog;
 
 import java.util.ArrayList;
 
+/*
+ * GameView class
+ * author: Arnau Nuñez
+ * data: 04/03/2025
+ * grup: DAM2
+ */
 public class GameView extends View {
     private ArrayList<Ball> bulletBalls;
     private int score = 0;
@@ -41,14 +47,14 @@ public class GameView extends View {
                     int x = (int) event.getX();
                     int y = (int) event.getY();
 
-                    // Check if touch is on the ship
+                    // Comprovar si s'ha tocat la nau o no
                     if (x >= nau.getPosX() && x <= nau.getPosX() + drawableNau.getIntrinsicWidth() &&
                         y >= nau.getPosY() && y <= nau.getPosY() + drawableNau.getIntrinsicHeight()) {
-                        // Shoot a white ball
+                        // Disparar bala si se toca la nave
                         shootBall();
                         return true;
                     } else {
-                        // Create a random ball when touching elsewhere
+                        // Crear bola si no se toca la nave
                         randomBall(x, y);
                         return true;
                     }
@@ -58,7 +64,11 @@ public class GameView extends View {
         });
     }
 
+    /*
+     * Crear una bala en la posició de la nave
+     */
     private void shootBall() {
+        // Calcular el centro de la nave
         int shipCenterX = (int)(nau.getPosX() + drawableNau.getIntrinsicWidth() / 2);
 
         int shipTopY = (int)nau.getPosY();
@@ -72,13 +82,21 @@ public class GameView extends View {
         bullet.setDirectionX(true);
         bullet.setMoveOnlyVertically(true);
 
+        // Pintar la bala de blanco
         Paint p = new Paint();
         p.setColor(Color.WHITE);
         bullet.setPaint(p);
 
+        // Añadir la bala a la lista de balas
         bulletBalls.add(bullet);
     }
 
+    /**
+     * Crea una bola amb posició determinada,
+     * velocitat, radi i color aleatori
+     * @param x Coordenada x
+     * @param y Coordenada y
+     */
     private void randomBall(int x, int y) {
         Ball ball = new Ball(x, y);
         ball.setRadius((int) ((Math.random() + 0.35) * 100));
@@ -92,6 +110,10 @@ public class GameView extends View {
         listBalls.add(ball);
     }
 
+    /**
+     * Retorna un color aleatori
+     * @return Color
+     */
     private int randomColor() {
         //Con el random se generan colores aleatorios (rojo, azul, verde, amarillo)
         int color = (int) (Math.random() * 4);
@@ -124,8 +146,12 @@ public class GameView extends View {
         nau.setPosY(h - drawableNau.getIntrinsicHeight() - 10); // 10 píxeles de margen
     }
 
+    /**
+     * Inicialitza l'entorn del joc
+     * @param context Context
+     */
     private void initEnvioroment(Context context) {
-        // Boles
+        // Boles inicials
         listBalls = new ArrayList<>();
         Ball ball = new Ball(200, 200);
         ball.setRadius(100);
@@ -158,14 +184,17 @@ public class GameView extends View {
     }
 
     public void move() {
+        // Mover las bolas
         for (Ball b : listBalls) {
             b.move();
         }
 
+        // Mover las balas
         for (int i = bulletBalls.size() - 1; i >= 0; i--) {
             Ball bullet = bulletBalls.get(i);
             bullet.move();
 
+            // Eliminar las balas que sobrepasen el límite superior
             if (bullet.getY() - bullet.getRadius() <= 0) {
                 bulletBalls.remove(i);
             }
@@ -174,10 +203,6 @@ public class GameView extends View {
 
     public void moveNau() {
         nau.move();
-    }
-
-    public void collisionsNauBall() {
-        //TODO
     }
 
     public void collisions() {
@@ -201,11 +226,57 @@ public class GameView extends View {
                 }
             }
         }
+        // Comprovar colisio amb la paret (y = 0)
         checkBulletCollisions();
+        // Comprovar si s'han eliminat totes les boles (victòria)
+        checkWinCondition();
+    }
+
+    /**
+     * Comprova si s'han eliminat totes les boles
+     */
+    private void checkWinCondition() {
+        if (listBalls.isEmpty() && !gameOver) {
+            gameOver = true;
+            showWinPopup();
+        }
+    }
+
+    /**
+     * Mostra un popup amb el missatge de victòria
+     */
+    private void showWinPopup() {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("Has guanyat!")
+                       .setMessage("Has eliminat totes les boles!\nPuntuació: " + score)
+                       .setPositiveButton("Reiniciar", (dialog, which) -> {
+                           // Reiniciar el joc
+                           listBalls.clear();
+                           initEnvioroment(getContext());
+                            // Iniciar nuevo hilo
+                           ThreadGame thread = new ThreadGame(GameView.this);
+                           thread.start();
+                           // Invalidar la vista
+                           invalidate();
+                       })
+                       .setNegativeButton("Sortir", (dialog, which) -> {
+                            // Tancar l'aplicació
+                            ((android.app.Activity) getContext()).finish();
+                       })
+                       .setCancelable(false)
+                       .show();
+            }
+        });
     }
 
     private boolean gameOver = false;
 
+    /**
+     * Comprova si hi ha colisio entre la nau i les boles
+     */
     public void collisionNauBall() {
         for (Ball b : listBalls) {
             if (nau.collisionBallAndNau(b, nau)) {
@@ -216,6 +287,9 @@ public class GameView extends View {
         }
     }
 
+    /**
+     * Comprova si hi ha colisio entre les boles i les bales
+     */
     private void checkBulletCollisions() {
         for (int i = bulletBalls.size() - 1; i >= 0; i--) {
             Ball bullet = bulletBalls.get(i);
@@ -240,6 +314,9 @@ public class GameView extends View {
         this.gameOver = gameOver;
     }
 
+    /**
+     * Mostra un popup amb el missatge de game over
+     */
     private void showPopup() {
         post(new Runnable() {
             @Override
@@ -270,18 +347,22 @@ public class GameView extends View {
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
+        // Dibuixar totes les boles
         for (Ball b : listBalls) {
             b.onDraw(canvas);
         }
 
+        // Dibuixar totes les bales
         for (Ball b : bulletBalls) {
             b.onDraw(canvas);
         }
 
+        // Dibuixar la nau
         if (nau != null) {
             nau.dibuixaGrafic(canvas);
         }
 
+        // Dibuixar la puntuació
         Paint textPaint = new Paint();
         textPaint.setColor(Color.WHITE);
         textPaint.setTextSize(50);
