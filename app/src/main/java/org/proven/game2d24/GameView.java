@@ -11,6 +11,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 
 import java.util.ArrayList;
 
@@ -22,6 +23,7 @@ public class GameView extends View {
 
     // Nau
     GraficNau nau;
+    int width, height;
 
     public GameView(Context context) {
         super(context);
@@ -48,7 +50,9 @@ public class GameView extends View {
     private void randomBall(int x, int y) {
         Ball ball = new Ball(x, y);
         ball.setRadius((int) ((Math.random() + 0.35) * 100));
-        ball.setVelocity((int) (Math.random() * 50));
+        ball.setVelocity((int) (Math.random() * 15));
+        ball.setMaxX(width);
+        ball.setMaxY(height);
         Paint p = new Paint();
         p.setColor(randomColor());
         p.setStrokeWidth(10);
@@ -77,6 +81,8 @@ public class GameView extends View {
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
         System.out.println("onSizeChanged: " + w + "-" + h);
+        width = w;
+        height = h;
         for (Ball b : listBalls) {
             b.setMaxX(w);
             b.setMaxY(h);
@@ -91,25 +97,29 @@ public class GameView extends View {
         listBalls = new ArrayList<>();
         Ball ball = new Ball(200, 200);
         ball.setRadius(100);
-        ball.setVelocity(30);
+        ball.setVelocity(15);
+        ball.setMaxX(width);
+        ball.setMaxY(height);
         Paint p = new Paint();
         p.setColor(Color.RED);
         p.setStrokeWidth(10);
         ball.setPaint(p);
-
-        Ball ball1 = new Ball(100, 400);
-        ball1.setRadius(80);
-        ball1.setVelocity(30);
-        p = new Paint();
-        p.setColor(Color.BLUE);
-        ball1.setPaint(p);
-
         listBalls.add(ball);
-        listBalls.add(ball1);
 
-        // Nau
-        drawableNau = context.getResources().getDrawable(R.drawable.nau,context.getTheme());
-        nau = new GraficNau(this, drawableNau);
+        // Reiniciar la nave
+        if (nau == null) {
+            // Primera inicializació
+            drawableNau = context.getResources().getDrawable(R.drawable.nau, context.getTheme());
+            nau = new GraficNau(this, drawableNau);
+        }
+
+        // Restablecer posició
+        if (getWidth() > 0 && getHeight() > 0) {
+            nau.setPosX(getWidth()/2 - drawableNau.getIntrinsicWidth()/2);
+            nau.setPosY(getHeight() - drawableNau.getIntrinsicHeight() - 10);
+        }
+
+        setGameOver(false);
     }
 
     public void move() {
@@ -135,8 +145,6 @@ public class GameView extends View {
                 if (b1.collision(b2)) {
                     //si hi ha colisio entre b1 i b2 del mateix color
                     if (b1.getPaint().getColor() == b2.getPaint().getColor()) {
-                        //b1.setRadius(b1.getRadius() + b2.getRadius());
-                        //b2.setRadius(0);
                         listBalls.remove(b1);
                         listBalls.remove(b2);
                     } else {
@@ -151,8 +159,50 @@ public class GameView extends View {
         }
     }
 
+    private boolean gameOver = false;
+
     public void collisionNauBall() {
-        // TODO
+        for (Ball b : listBalls) {
+            if (nau.collisionBallAndNau(b, nau)) {
+                gameOver = true;
+                showPopup();
+                break;
+            }
+        }
+    }
+
+    public boolean isGameOver() {
+        return gameOver;
+    }
+
+    public void setGameOver(boolean gameOver) {
+        this.gameOver = gameOver;
+    }
+
+    private void showPopup() {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                builder.setTitle("Game Over")
+                       .setMessage("La nau ha xocat amb una bola!")
+                       .setPositiveButton("Reiniciar", (dialog, which) -> {
+                           // Reiniciar el joc
+                           listBalls.clear();
+                           initEnvioroment(getContext());
+                           // Iniciar nuevo hilo
+                           ThreadGame thread = new ThreadGame(GameView.this);
+                           thread.start();
+                           invalidate();
+                       })
+                       .setNegativeButton("Sortir", (dialog, which) -> {
+                            // Tancar l'aplicació
+                            ((android.app.Activity) getContext()).finish();
+                       })
+                       .setCancelable(false)
+                       .show();
+            }
+        });
     }
 
     @Override

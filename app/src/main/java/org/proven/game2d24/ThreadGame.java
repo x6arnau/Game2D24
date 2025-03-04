@@ -2,6 +2,7 @@ package org.proven.game2d24;
 
 public class ThreadGame extends Thread {
     GameView gameView;
+    private static final int INITIAL_DELAY = 2000;
 
     public ThreadGame(GameView gameView) {
         this.gameView = gameView;
@@ -11,8 +12,9 @@ public class ThreadGame extends Thread {
     public void run() {
         super.run();
         try {
-            while (true) {
-                sleep(200);
+            sleep(INITIAL_DELAY);
+            while (!gameView.isGameOver()) {
+                sleep(20);
                 gameView.move();
                 gameView.moveNau();
                 gameView.collisions();
