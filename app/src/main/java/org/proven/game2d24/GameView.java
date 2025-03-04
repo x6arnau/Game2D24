@@ -16,7 +16,8 @@ import androidx.appcompat.app.AlertDialog;
 import java.util.ArrayList;
 
 public class GameView extends View {
-
+    private ArrayList<Ball> bulletBalls;
+    private int score = 0;
     ArrayList<Ball> listBalls;
 
     Drawable drawableNau;
@@ -35,16 +36,47 @@ public class GameView extends View {
         initEnvioroment(context);
         setOnTouchListener(new OnTouchListener() {
             @Override
-            public boolean onTouch(View v, android.view.MotionEvent event) {
+            public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
                     int x = (int) event.getX();
                     int y = (int) event.getY();
-                    randomBall(x, y);
-                    return true;
+
+                    // Check if touch is on the ship
+                    if (x >= nau.getPosX() && x <= nau.getPosX() + drawableNau.getIntrinsicWidth() &&
+                        y >= nau.getPosY() && y <= nau.getPosY() + drawableNau.getIntrinsicHeight()) {
+                        // Shoot a white ball
+                        shootBall();
+                        return true;
+                    } else {
+                        // Create a random ball when touching elsewhere
+                        randomBall(x, y);
+                        return true;
+                    }
                 }
                 return false;
             }
         });
+    }
+
+    private void shootBall() {
+        int shipCenterX = (int)(nau.getPosX() + drawableNau.getIntrinsicWidth() / 2);
+
+        int shipTopY = (int)nau.getPosY();
+
+        Ball bullet = new Ball(shipCenterX, shipTopY);
+        bullet.setRadius(30);
+        bullet.setVelocity(20);
+        bullet.setMaxX(width);
+        bullet.setMaxY(height);
+        bullet.setDirectionY(false);
+        bullet.setDirectionX(true);
+        bullet.setMoveOnlyVertically(true);
+
+        Paint p = new Paint();
+        p.setColor(Color.WHITE);
+        bullet.setPaint(p);
+
+        bulletBalls.add(bullet);
     }
 
     private void randomBall(int x, int y) {
@@ -106,6 +138,9 @@ public class GameView extends View {
         ball.setPaint(p);
         listBalls.add(ball);
 
+        bulletBalls = new ArrayList<>();
+        score = 0;
+
         // Reiniciar la nave
         if (nau == null) {
             // Primera inicializació
@@ -125,6 +160,15 @@ public class GameView extends View {
     public void move() {
         for (Ball b : listBalls) {
             b.move();
+        }
+
+        for (int i = bulletBalls.size() - 1; i >= 0; i--) {
+            Ball bullet = bulletBalls.get(i);
+            bullet.move();
+
+            if (bullet.getY() - bullet.getRadius() <= 0) {
+                bulletBalls.remove(i);
+            }
         }
     }
 
@@ -157,6 +201,7 @@ public class GameView extends View {
                 }
             }
         }
+        checkBulletCollisions();
     }
 
     private boolean gameOver = false;
@@ -167,6 +212,22 @@ public class GameView extends View {
                 gameOver = true;
                 showPopup();
                 break;
+            }
+        }
+    }
+
+    private void checkBulletCollisions() {
+        for (int i = bulletBalls.size() - 1; i >= 0; i--) {
+            Ball bullet = bulletBalls.get(i);
+            for (int j = listBalls.size() - 1; j >= 0; j--) {
+                Ball randomBall = listBalls.get(j);
+
+                if (bullet.collision(randomBall)) {
+                    bulletBalls.remove(i);
+                    listBalls.remove(j);
+                    score++;
+                    break;
+                }
             }
         }
     }
@@ -208,12 +269,22 @@ public class GameView extends View {
     @Override
     protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
+
         for (Ball b : listBalls) {
             b.onDraw(canvas);
         }
-        // Dibujar la nave
+
+        for (Ball b : bulletBalls) {
+            b.onDraw(canvas);
+        }
+
         if (nau != null) {
             nau.dibuixaGrafic(canvas);
         }
+
+        Paint textPaint = new Paint();
+        textPaint.setColor(Color.WHITE);
+        textPaint.setTextSize(50);
+        canvas.drawText("Score: " + score, 20, 60, textPaint);
     }
 }

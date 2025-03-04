@@ -48,34 +48,28 @@ public class Ball {
                 , getRadius(), getPaint());
     }
 
+    private boolean moveOnlyVertically = false;
+
+    public void setMoveOnlyVertically(boolean moveOnlyVertically) {
+        this.moveOnlyVertically = moveOnlyVertically;
+    }
+
     public void move() {
-        // Directions  X
-        if (getX() > getMaxX() - getRadius()) {
-            setDirectionX(false);
-            setX(getMaxX() - getRadius());
+        if (moveOnlyVertically) {
+            // For bullets - move only vertically
+            y = directionY ? y + velocity : y - velocity;
+        } else {
+            // For normal balls - move in both directions
+            x = directionX ? x + velocity : x - velocity;
+            y = directionY ? y + velocity : y - velocity;
         }
-        if (getX() < getRadius()) {
-            setDirectionX(true);
-            setX(getRadius());
+
+        // Boundary logic (existing code)
+        if (x - radius <= 0 || x + radius >= maxX) {
+            directionX = !directionX;
         }
-        // Directions  Y
-        if (getY() > getMaxY() - getRadius()) {
-            setDirectionY(false);
-            setY(getMaxY() - getRadius());
-        }
-        if (getY() < getRadius()) {
-            setDirectionY(true);
-            setY(getRadius());
-        }
-        if (isDirectionX()) {  // Right
-            setX(getX() + getVelocity());
-        } else {                // left
-            setX(getX() - getVelocity());
-        }
-        if (isDirectionY()) {  // Down
-            setY(getY() + getVelocity());
-        } else {                // Up
-            setY(getY() - getVelocity());
+        if (y - radius <= 0 || y + radius >= maxY) {
+            directionY = !directionY;
         }
     }
 
