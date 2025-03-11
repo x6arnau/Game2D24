@@ -16,7 +16,7 @@ public class GraficNau {
     private int ampleImg, altImg;     //Dimensions de l'imatge
     private double posX, posY;   //Posició de la Nau al layout (vista)
     private boolean direccioDreta = true;  // true = moure a la dreta, false = moure a l'esquerra
-    private final int STEP = 15;  // Velocitat de moviment
+    private final int STEP = 8;  // Velocitat de moviment
 
     protected GraficNau(View viewParam, Drawable drawableNau) {
         this.view = viewParam;
